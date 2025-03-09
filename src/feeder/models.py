@@ -13,5 +13,5 @@ class Feeders(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)    
     users = relationship("User_Feeder", backref="feeder")
-    #collars = relationship("Feeder_Collar", backref="feeder")
-    #settings = relationship("Feeder_Settings", backref="feeder") 
+    collars = relationship("Feeder_Collar", backref="feeder")
+    settings = relationship("Feeder_Settings", backref="feeder") 

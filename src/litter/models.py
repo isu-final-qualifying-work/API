@@ -13,4 +13,4 @@ class Litters(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)    
     users = relationship("User_Litter", backref="litter")
-    #collars = relationship("Litter_Collar", backref="litter")
+    collars = relationship("Litter_Collar", backref="litter")
