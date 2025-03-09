@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 from src.user.schemas import User, UserID, NewUser
 from src.user.models import Users
 from sqlalchemy.orm import Session
-from datetime import datetime
 from src.dependencies import get_db
+import hashlib
 
 router = APIRouter()
 
@@ -29,7 +29,7 @@ async def get_user(request: UserID, db: Session = Depends(get_db)):
 async def add_user(request: NewUser, db: Session = Depends(get_db)):
     try:
         #добавить хеширование и токены
-        user = Users(name = request.name, password = request.password)
+        user = Users(name = request.name, password = hashlib.sha256(request.password.encode()).hexdigest())
         db.add(user)
         db.commit()
         db.refresh(user)
