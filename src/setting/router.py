@@ -28,7 +28,7 @@ async def get_settings(request: SettingID, db: Session = Depends(get_db)):
 @router.post("/add_settings")
 async def add_settings(request: NewSetting, db: Session = Depends(get_db)):
     try:
-        settings = Settings(size = request.size)
+        settings = Settings(size = request.size, schedule = request.schedule)
         feeder = db.query(Feeders).filter(Feeders.id == request.feeder_id).one()
         db.add(settings)
         settings_user = Feeder_Settings(setting_id = feeder.id, feeder_id = settings.id)
@@ -44,7 +44,7 @@ async def update_settings(request: Setting, db: Session = Depends(get_db)):
     try:
         db.query(Settings).filter(Settings.id == request.id).update({
             'size': request.size,
-            #'schedule': request.schedule
+            'schedule': request.schedule
         })
         db.commit()
         return db.query(Settings).filter(Settings.id == request.id).all()
