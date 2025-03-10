@@ -30,7 +30,7 @@ async def get_collar(request: CollarID, db: Session = Depends(get_db)):
 async def add_collar(request: NewCollar, db: Session = Depends(get_db)):
     try:
         collar = Collars(name = request.name)
-        db.add(feeder)
+        db.add(collar)
         if request.device_type == 'feeder':
             feeder = db.query(Feeders).filter(Feeders.id == request.device_id).one()
             feeder_collar = Feeder_Collar(feeder_id = feeder.id, collar_id = collar.id)
