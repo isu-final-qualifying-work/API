@@ -14,4 +14,5 @@ class Settings(Base):
     id = Column(Integer, primary_key=True)
     size = Column(Integer, nullable=False, default=30)
     schedule = Column(postgresql.ARRAY(Integer, dimensions=2), nullable=False, default=[[8, 0]])
+    timezone = Column(Integer, nullable=False, default=0)
     feeders = relationship("Feeder_Settings", backref="setting")

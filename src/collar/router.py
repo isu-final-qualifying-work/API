@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from src.collar.models import Collars, Feeder_Collar, Litter_Collar
-from src.collar.schemas import Collar, CollarID, NewCollar
+from src.collar.schemas import Collar, CollarID, NewCollar, CollarByFeeder
 from src.feeder.models import Feeders
 from src.litter.models import Litters
 from sqlalchemy.orm import Session
@@ -26,11 +26,31 @@ async def get_collar(request: CollarID, db: Session = Depends(get_db)):
         return {'message': e}
 
 
+@router.post("/get_collars_by_feeder")
+async def get_get_collars_by_feeder_by_feeder(request: CollarByFeeder, db: Session = Depends(get_db)):
+    try:
+        feeder = db.query(Feeders).filter(Feeders.name == request.feeder_name).one()
+        print(feeder)
+        feeder_collars = db.query(Feeder_Collar).filter(Feeder_Collar.feeder_id == feeder.id).all()
+        print(feeder_collars)
+        collars = []
+        for feeder_collar in feeder_collars:
+            print(feeder_collar.collar_id)
+            collar = db.query(Collars).filter(Collars.id == feeder_collar.collar_id).one()
+            
+            print(collar)
+            collars.append(collar.name)
+        return collars
+    except Exception as e:
+        return {'message': e}
+    
+
 @router.post("/add_collar")
 async def add_collar(request: NewCollar, db: Session = Depends(get_db)):
     try:
         collar = Collars(name = request.name)
         db.add(collar)
+        db.commit()
         if request.device_type == 'feeder':
             feeder = db.query(Feeders).filter(Feeders.id == request.device_id).one()
             feeder_collar = Feeder_Collar(feeder_id = feeder.id, collar_id = collar.id)

@@ -12,3 +12,6 @@ class NewCollar(BaseModel):
 
 class CollarID(BaseModel):
     id: int
+
+class CollarByFeeder(BaseModel):
+    feeder_name: str

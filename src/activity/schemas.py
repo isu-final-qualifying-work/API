@@ -9,8 +9,15 @@ class CollarActivity(BaseModel):
     z: float
 
 class NewCollarActivity(BaseModel):
-    collar: str
+    collar_id: int
     x: float
     y: float
     z: float
+    datetime: datetime
+
+class FeederFeed(BaseModel):
+    feeder: str
+
+class NewFeederFeed(BaseModel):
+    feeder_id: int
     datetime: datetime

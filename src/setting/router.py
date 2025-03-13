@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from src.setting.models import Settings, Feeder_Settings
-from src.setting.schemas import SettingID, NewSetting, Setting
+from src.setting.schemas import SettingID, NewSetting, Setting, SettingByFeeder
 from src.feeder.models import Feeders
 from sqlalchemy.orm import Session
 from src.dependencies import get_db
@@ -19,7 +19,21 @@ async def settings_all(db: Session = Depends(get_db)):
 @router.post("/get_settings")
 async def get_settings(request: SettingID, db: Session = Depends(get_db)):
     try:
-        settings = db.query(SettingID).filter(SettingID.id == request.id).all()
+        settings = db.query(Settings).filter(Settings.id == request.id).all()
+        return settings
+    except Exception as e:
+        return {'message': e}
+    
+
+@router.post("/get_settings_by_feeder", response_model=Setting)
+async def get_settings_by_feeder(request: SettingByFeeder, db: Session = Depends(get_db)):
+    try:
+        feeder = db.query(Feeders).filter(Feeders.name == request.feeder_name).one()
+        print(feeder)
+        feeder_setting = db.query(Feeder_Settings).filter(Feeder_Settings.feeder_id == feeder.id).one()
+        print(feeder_setting)
+        settings = db.query(Settings).filter(Settings.id == feeder_setting.setting_id).one()
+        print(settings)
         return settings
     except Exception as e:
         return {'message': e}
@@ -28,10 +42,11 @@ async def get_settings(request: SettingID, db: Session = Depends(get_db)):
 @router.post("/add_settings")
 async def add_settings(request: NewSetting, db: Session = Depends(get_db)):
     try:
-        settings = Settings(size = request.size, schedule = request.schedule)
+        settings = Settings(size = request.size, schedule = request.schedule, timezone = request.timezone)
         feeder = db.query(Feeders).filter(Feeders.id == request.feeder_id).one()
         db.add(settings)
-        settings_user = Feeder_Settings(setting_id = feeder.id, feeder_id = settings.id)
+        db.commit()
+        settings_user = Feeder_Settings(feeder_id = feeder.id, setting_id = settings.id)
         db.add(settings_user)
         db.commit()
         return settings
