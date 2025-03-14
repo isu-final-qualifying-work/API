@@ -15,3 +15,6 @@ class CollarID(BaseModel):
 
 class CollarByFeeder(BaseModel):
     feeder_name: str
+
+class CollarByLitter(BaseModel):
+    litter_name: str

@@ -20,3 +20,20 @@ class FeederFeeds(Base):
     id = Column(Integer, primary_key=True, index=True)
     feeder_id = Column(Integer)
     datetime = Column(DateTime)
+
+
+class LitterCleans(Base):
+    __tablename__ = "litter_cleans"
+
+    id = Column(Integer, primary_key=True, index=True)
+    litter_id = Column(Integer)
+    collar_id = Column(Integer)
+    datetime = Column(DateTime)
+
+class EatingActivity(Base):
+    __tablename__ = "eating_activity"
+
+    id = Column(Integer, primary_key=True, index=True)
+    feeder_id = Column(Integer)
+    collar_id = Column(Integer)
+    datetime = Column(DateTime)

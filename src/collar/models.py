@@ -12,7 +12,7 @@ class Litter_Collar(Base):
     __tablename__ = 'litter_collar'
     id = Column(Integer, primary_key=True)
     collar_id =  Column(Integer, ForeignKey("collars.id"))
-    feeder_id =  Column(Integer, ForeignKey("litters.id"))
+    litter_id =  Column(Integer, ForeignKey("litters.id"))
 
 class Collars(Base):
     __tablename__ = 'collars'

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from src.collar.models import Collars, Feeder_Collar, Litter_Collar
-from src.collar.schemas import Collar, CollarID, NewCollar, CollarByFeeder
+from src.collar.schemas import Collar, CollarID, NewCollar, CollarByFeeder, CollarByLitter
 from src.feeder.models import Feeders
 from src.litter.models import Litters
 from sqlalchemy.orm import Session
@@ -27,7 +27,7 @@ async def get_collar(request: CollarID, db: Session = Depends(get_db)):
 
 
 @router.post("/get_collars_by_feeder")
-async def get_get_collars_by_feeder_by_feeder(request: CollarByFeeder, db: Session = Depends(get_db)):
+async def get_collars_by_feeder(request: CollarByFeeder, db: Session = Depends(get_db)):
     try:
         feeder = db.query(Feeders).filter(Feeders.name == request.feeder_name).one()
         print(feeder)
@@ -43,7 +43,26 @@ async def get_get_collars_by_feeder_by_feeder(request: CollarByFeeder, db: Sessi
         return collars
     except Exception as e:
         return {'message': e}
-    
+
+
+@router.post("/get_collars_by_litter")
+async def get_collars_by_litter(request: CollarByLitter, db: Session = Depends(get_db)):
+    try:
+        litter = db.query(Litters).filter(Litters.name == request.litter_name).one()
+        print(litter)
+        litter_collars = db.query(Litter_Collar).filter(Litter_Collar.litter_id == litter.id).all()
+        print(litter_collars)
+        collars = []
+        for litter_collar in litter_collars:
+            print(litter_collar.collar_id)
+            collar = db.query(Collars).filter(Collars.id == litter_collar.collar_id).one()
+            
+            print(collar)
+            collars.append(collar.name)
+        return collars
+    except Exception as e:
+        return {'message': e}    
+
 
 @router.post("/add_collar")
 async def add_collar(request: NewCollar, db: Session = Depends(get_db)):

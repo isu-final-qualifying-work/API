@@ -21,3 +21,21 @@ class FeederFeed(BaseModel):
 class NewFeederFeed(BaseModel):
     feeder_id: int
     datetime: datetime
+
+class LitterClean(BaseModel):
+    litter: str
+    collar: str
+
+class NewLitterClean(BaseModel):
+    litter_id: int
+    collar_id: int
+    datetime: datetime
+
+class Eating(BaseModel):
+    feeder: str
+    collar: str
+
+class NewEating(BaseModel):
+    feeder_id: int
+    collar_id: int
+    datetime: datetime
