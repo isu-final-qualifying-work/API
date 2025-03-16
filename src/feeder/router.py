@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from src.feeder.models import Feeders, User_Feeder
-from src.feeder.schemas import NewFeeder, FeederID
+from src.feeder.schemas import NewFeeder, FeederID, Feeder
 from src.user.models import Users
 from sqlalchemy.orm import Session
 from src.dependencies import get_db
@@ -25,7 +25,7 @@ async def get_feeder(request: FeederID, db: Session = Depends(get_db)):
         return {'message': e}
 
 
-@router.post("/add_feeder")
+@router.post("/add_feeder", response_model=Feeder)
 async def add_feeder(request: NewFeeder, db: Session = Depends(get_db)):
     try:
         feeder = Feeders(name = request.name)
@@ -34,15 +34,16 @@ async def add_feeder(request: NewFeeder, db: Session = Depends(get_db)):
         feeder_user = User_Feeder(user_id = user.id, feeder_id = feeder.id)
         db.add(feeder_user)
         db.commit()
+        db.refresh(feeder)
         return feeder
     except Exception as e:
         return {'message': e}
     
-    
-@router.delete("/delete_feeder")
-async def delete_feeder(request: FeederID, db: Session = Depends(get_db)):
+
+@router.delete("/delete_feeder/{id}")
+async def delete_feeder(id: int, db: Session = Depends(get_db)):
     try:
-        db.query(Feeders).filter(Feeders.id == request.id).delete()
+        db.query(Feeders).filter(Feeders.id == id).delete()
         db.commit()
         return {'message': 'ok'}
     except Exception as e:

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from src.litter.models import Litters, User_Litter
-from src.litter.schemas import LitterID, NewLitter
+from src.litter.schemas import LitterID, NewLitter, Litter
 from src.user.models import Users
 from sqlalchemy.orm import Session
 from src.dependencies import get_db
@@ -25,7 +25,7 @@ async def get_litter(request: LitterID, db: Session = Depends(get_db)):
         return {'message': e}
 
 
-@router.post("/add_litter")
+@router.post("/add_litter", response_model=Litter)
 async def add_litter(request: NewLitter, db: Session = Depends(get_db)):
     try:
         litter = Litters(name = request.name)
@@ -34,15 +34,16 @@ async def add_litter(request: NewLitter, db: Session = Depends(get_db)):
         litter_user = User_Litter(user_id = user.id, litter_id = litter.id)
         db.add(litter_user)
         db.commit()
+        db.refresh(litter)
         return litter
     except Exception as e:
         return {'message': e}
     
     
-@router.delete("/delete_litter")
-async def delete_litter(request: LitterID, db: Session = Depends(get_db)):
+@router.delete("/delete_litter/{id}")
+async def delete_litter(id: int, db: Session = Depends(get_db)):
     try:
-        db.query(Litters).filter(Litters.id == request.id).delete()
+        db.query(Litters).filter(Litters.id == id).delete()
         db.commit()
         return {'message': 'ok'}
     except Exception as e:
