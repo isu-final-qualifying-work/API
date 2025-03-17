@@ -11,3 +11,11 @@ class NewFeeder(BaseModel):
 
 class FeederID(BaseModel):
     id: int
+
+class FullFeederData(BaseModel):
+    id: int
+    name: str
+    collars: list
+    schedule: list
+    timezone: int
+    size: int

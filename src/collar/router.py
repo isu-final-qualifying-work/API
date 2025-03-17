@@ -64,12 +64,15 @@ async def get_collars_by_litter(request: CollarByLitter, db: Session = Depends(g
         return {'message': e}    
 
 
-@router.post("/add_collar")
+@router.post("/add_collar", response_model=Collar)
 async def add_collar(request: NewCollar, db: Session = Depends(get_db)):
     try:
-        collar = Collars(name = request.name)
-        db.add(collar)
-        db.commit()
+        if len(db.query(Collars).filter(Collars.name == request.name).all()) == 0:
+            collar = Collars(name = request.name)
+            db.add(collar)
+            db.commit()
+        else:
+             collar = db.query(Collars).filter(Collars.name == request.name).one()
         if request.device_type == 'feeder':
             feeder = db.query(Feeders).filter(Feeders.id == request.device_id).one()
             feeder_collar = Feeder_Collar(feeder_id = feeder.id, collar_id = collar.id)
@@ -84,10 +87,12 @@ async def add_collar(request: NewCollar, db: Session = Depends(get_db)):
         return {'message': e}
     
     
-@router.delete("/delete_collar")
-async def delete_collar(request: CollarID, db: Session = Depends(get_db)):
+@router.delete("/delete_collar/{id}")
+async def delete_collar(id: int, db: Session = Depends(get_db)):
     try:
-        db.query(Collars).filter(Collars.id == request.id).delete()
+        db.query(Litter_Collar).filter(Litter_Collar.collar_id == id).delete()
+        db.query(Feeder_Collar).filter(Feeder_Collar.collar_id == id).delete()
+        db.query(Collars).filter(Collars.id == id).delete()
         db.commit()
         return {'message': 'ok'}
     except Exception as e:
