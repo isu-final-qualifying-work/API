@@ -5,7 +5,8 @@ from src.user.models import Users
 from src.user.schemas import UserID
 from src.collar.models import Collars
 from sqlalchemy.orm import Session
-from src.dependencies import get_db
+from src.dependencies import get_db, get_current_user
+from src.auth.schemas import Token
 
 router = APIRouter()
 
@@ -30,8 +31,8 @@ async def get_litter(request: LitterID, db: Session = Depends(get_db)):
 @router.post("/add_litter", response_model=Litter)
 async def add_litter(request: NewLitter, db: Session = Depends(get_db)):
     try:
+        user = get_current_user(db, request.access_token)
         litter = Litters(name = request.name)
-        user = db.query(Users).filter(Users.id == request.user_id).one()
         db.add(litter)
         db.commit()
         litter_user = User_Litter(user_id = user.id, litter_id = litter.id)
@@ -56,11 +57,10 @@ async def delete_litter(id: int, db: Session = Depends(get_db)):
 
     
 @router.post("/get_litters_by_user")
-async def get_litters_by_user(request: UserID, db: Session = Depends(get_db)):
+async def get_litters_by_user(request: Token, db: Session = Depends(get_db)):
     try:
+        user = get_current_user(db, request.access_token)
         data = []
-        user = db.query(Users).filter(Users.id == request.id).one()
-        print(user)
         litters = db.query(User_Litter).filter(User_Litter.user_id == user.id).all()
         for litter in litters:
             print(litter.litter_id, litter.user_id)

@@ -1,13 +1,13 @@
 from pydantic import BaseModel
+from src.auth.schemas import Token
 
 
 class Litter(BaseModel):
     id: int
     name: str
 
-class NewLitter(BaseModel):
+class NewLitter(Token):
     name: str
-    user_id: int
 
 class LitterID(BaseModel):
     id: int

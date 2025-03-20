@@ -24,20 +24,6 @@ async def get_user(request: UserID, db: Session = Depends(get_db)):
     except Exception as e:
         return {'message': e}
 
-
-@router.post("/add_user", response_model=User)
-async def add_user(request: NewUser, db: Session = Depends(get_db)):
-    try:
-        #добавить хеширование и токены
-        user = Users(name = request.name, password = hashlib.sha256(request.password.encode()).hexdigest())
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        return user
-    except Exception as e:
-        return {'message': e}
-    
-    
     
 @router.post("/update_user")
 async def update_user(request: User, db: Session = Depends(get_db)):

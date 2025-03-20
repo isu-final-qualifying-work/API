@@ -1,13 +1,13 @@
 from pydantic import BaseModel
+from src.auth.schemas import Token
 
 
 class Feeder(BaseModel):
     id: int
     name: str
 
-class NewFeeder(BaseModel):
+class NewFeeder(Token):
     name: str
-    user_id: int
 
 class FeederID(BaseModel):
     id: int

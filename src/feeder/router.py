@@ -6,7 +6,8 @@ from src.collar.models import Collars
 from src.setting.models import Settings, Feeder_Settings
 from src.user.schemas import UserID
 from sqlalchemy.orm import Session
-from src.dependencies import get_db
+from src.dependencies import get_db, get_current_user
+from src.auth.schemas import Token
 
 router = APIRouter()
 
@@ -31,8 +32,8 @@ async def get_feeder(request: FeederID, db: Session = Depends(get_db)):
 @router.post("/add_feeder", response_model=Feeder)
 async def add_feeder(request: NewFeeder, db: Session = Depends(get_db)):
     try:
+        user = get_current_user(db, request.access_token)
         feeder = Feeders(name = request.name)
-        user = db.query(Users).filter(Users.id == request.user_id).one()
         db.add(feeder)
         db.commit()
         feeder_user = User_Feeder(user_id = user.id, feeder_id = feeder.id)
@@ -51,22 +52,22 @@ async def add_feeder(request: NewFeeder, db: Session = Depends(get_db)):
 
 @router.delete("/delete_feeder/{id}")
 async def delete_feeder(id: int, db: Session = Depends(get_db)):
-    try:
-        db.query(User_Feeder).filter(User_Feeder.feeder_id == id).delete()
-        settings = db.query(Feeder_Settings).filter(Feeder_Settings.feeder_id == id).one()
-        db.query(Settings).filter(Settings.id == settings.setting_id).delete()
-        settings.delete()
-        db.query(Feeders).filter(Feeders.id == id).delete()
-        db.commit()
-        return {'message': 'ok'}
-    except Exception as e:
-        return {'message': e}
+        try:
+            db.query(User_Feeder).filter(User_Feeder.feeder_id == id).delete()
+            settings = db.query(Feeder_Settings).filter(Feeder_Settings.feeder_id == id).one()
+            db.query(Settings).filter(Settings.id == settings.setting_id).delete()
+            settings.delete()
+            db.query(Feeders).filter(Feeders.id == id).delete()
+            db.commit()
+            return {'message': 'ok'}
+        except Exception as e:
+            return {'message': e}
     
 @router.post("/get_feeders_by_user")
-async def get_feeders_by_user(request: UserID, db: Session = Depends(get_db)):
+async def get_feeders_by_user(request: Token, db: Session = Depends(get_db)):
     try:
+        user = get_current_user(db, request.access_token)
         data = []
-        user = db.query(Users).filter(Users.id == request.id).one()
         print(user)
         feeders = db.query(User_Feeder).filter(User_Feeder.user_id == user.id).all()
         for feeder in feeders:

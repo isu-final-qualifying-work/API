@@ -57,12 +57,16 @@ async def add_settings(request: NewSetting, db: Session = Depends(get_db)):
 @router.post("/update_settings")
 async def update_settings(request: Setting, db: Session = Depends(get_db)):
     try:
-        db.query(Settings).filter(Settings.id == request.id).update({
+        settings = db.query(Feeder_Settings).filter(request.id == Feeder_Settings.feeder_id).one()
+        print(request)
+        db.query(Settings).filter(settings.id == Settings.id).update({
             'size': request.size,
-            'schedule': request.schedule
+            'schedule': request.schedule,
+            'timezone': request.timezone
         })
         db.commit()
-        return db.query(Settings).filter(Settings.id == request.id).all()
+        print(db.query(Settings).filter(settings.id == Settings.id).one())
+        return db.query(Settings).filter(Settings.id == settings.id).one()
     except Exception as e:
         return {'message': e}
         
