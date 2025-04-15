@@ -12,7 +12,7 @@ from src.user.models import Users
 
 SECRET_KEY = "123"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 def get_db():
     db = SessionLocal()

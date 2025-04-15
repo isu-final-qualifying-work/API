@@ -12,3 +12,5 @@ class NewUser(BaseModel):
 
 class UserID(BaseModel):
     id: int
+
+

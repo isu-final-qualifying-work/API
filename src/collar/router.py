@@ -3,6 +3,7 @@ from src.collar.models import Collars, Feeder_Collar, Litter_Collar
 from src.collar.schemas import Collar, CollarID, NewCollar, CollarByFeeder, CollarByLitter
 from src.feeder.models import Feeders
 from src.litter.models import Litters
+from src.pet.models import Pets
 from sqlalchemy.orm import Session
 from src.dependencies import get_db
 
@@ -48,7 +49,7 @@ async def get_collars_by_feeder(request: CollarByFeeder, db: Session = Depends(g
 @router.post("/get_collars_by_litter")
 async def get_collars_by_litter(request: CollarByLitter, db: Session = Depends(get_db)):
     try:
-        litter = db.query(Litters).filter(Litters.name == request.litter_name).one()
+        litter = db.query(Litters).filter(Litters.name == request.litter_name).all()[0]
         print(litter)
         litter_collars = db.query(Litter_Collar).filter(Litter_Collar.litter_id == litter.id).all()
         print(litter_collars)
@@ -67,12 +68,11 @@ async def get_collars_by_litter(request: CollarByLitter, db: Session = Depends(g
 @router.post("/add_collar", response_model=Collar)
 async def add_collar(request: NewCollar, db: Session = Depends(get_db)):
     try:
-        if len(db.query(Collars).filter(Collars.name == request.name).all()) == 0:
+        collar = db.query(Collars).filter(Feeders.name == request.name).first()
+        if not collar:
             collar = Collars(name = request.name)
             db.add(collar)
             db.commit()
-        else:
-             collar = db.query(Collars).filter(Collars.name == request.name).one()
         if request.device_type == 'feeder':
             feeder = db.query(Feeders).filter(Feeders.id == request.device_id).one()
             feeder_collar = Feeder_Collar(feeder_id = feeder.id, collar_id = collar.id)
@@ -82,6 +82,14 @@ async def add_collar(request: NewCollar, db: Session = Depends(get_db)):
             litter_collar = Litter_Collar(litter_id = litter.id, collar_id = collar.id)
             db.add(litter_collar)
         db.commit()
+        if request.kitten == True:
+            pet = Pets(name=request.pet_name, collar_id=collar.id, gender=request.gender, is_kitten=request.kitten)
+        else:
+            pet = Pets(name=request.pet_name, collar_id=collar.id, gender=request.gender, is_kitten=request.kitten, weight=request.weight, is_pregnant=request.pregnant, is_sterilized=request.sterilized)
+        db.add(pet)
+        db.commit()
+        print(pet)
+        return {'id': collar.id, 'name': collar.name}
         return collar
     except Exception as e:
         return {'message': e}

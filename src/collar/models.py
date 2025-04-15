@@ -20,3 +20,4 @@ class Collars(Base):
     name = Column(String, nullable=False)    
     feeders = relationship("Feeder_Collar", backref="collar")
     litters = relationship("Litter_Collar", backref="collar")
+    pet = relationship("Pets", back_populates="collar")

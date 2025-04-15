@@ -32,16 +32,21 @@ async def get_litter(request: LitterID, db: Session = Depends(get_db)):
 async def add_litter(request: NewLitter, db: Session = Depends(get_db)):
     try:
         user = get_current_user(db, request.access_token)
-        litter = Litters(name = request.name)
-        db.add(litter)
-        db.commit()
-        litter_user = User_Litter(user_id = user.id, litter_id = litter.id)
-        db.add(litter_user)
-        db.commit()
-        db.refresh(litter)
-        return litter
+        if(request.name.find("LIITER_")):
+            litter = db.query(Litters).filter(Litters.name == request.name).first()
+            if not litter:
+                litter = Litters(name=request.name)
+                db.add(litter)
+                db.commit()
+            print(user.name, litter.name)
+            litter_user = db.query(User_Litter).filter_by(user_id=user.id, litter_id=litter.id).first()
+            if not litter_user:
+                litter_user = User_Litter(user_id=user.id, litter_id=litter.id)
+                db.add(litter_user)
+                db.commit()
+                return {'id': litter.id, 'name': litter.name}
     except Exception as e:
-        return {'message': e}
+        return {"message": str(e)}
     
     
 @router.delete("/delete_litter/{id}")

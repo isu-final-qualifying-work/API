@@ -8,9 +8,9 @@ class CollarsActivity(Base):
     id = Column(Integer, primary_key=True, index=True)
     collar_id = Column(Integer)
     #collar = Column(String)
-    x = Column(Float)
-    y = Column(Float)
-    z = Column(Float)
+    # x = Column(Float)
+    # y = Column(Float)
+    # z = Column(Float)
     datetime = Column(DateTime)
 
 
@@ -36,4 +36,5 @@ class EatingActivity(Base):
     id = Column(Integer, primary_key=True, index=True)
     feeder_id = Column(Integer)
     collar_id = Column(Integer)
+    size = Column(Float)
     datetime = Column(DateTime)

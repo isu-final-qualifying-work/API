@@ -3,7 +3,7 @@ from src.feeder.models import Feeders, User_Feeder
 from src.feeder.schemas import NewFeeder, FeederID, Feeder, FullFeederData
 from src.user.models import Users
 from src.collar.models import Collars
-from src.setting.models import Settings, Feeder_Settings
+from src.setting.models import Settings
 from src.user.schemas import UserID
 from sqlalchemy.orm import Session
 from src.dependencies import get_db, get_current_user
@@ -33,30 +33,31 @@ async def get_feeder(request: FeederID, db: Session = Depends(get_db)):
 async def add_feeder(request: NewFeeder, db: Session = Depends(get_db)):
     try:
         user = get_current_user(db, request.access_token)
-        feeder = Feeders(name = request.name)
-        db.add(feeder)
-        db.commit()
-        feeder_user = User_Feeder(user_id = user.id, feeder_id = feeder.id)
-        db.add(feeder_user)
-        db.commit()
-        settings = Settings()
-        db.add(settings)
-        db.commit()
-        settings_user = Feeder_Settings(feeder_id = feeder.id, setting_id = settings.id)
-        db.add(settings_user)
-        db.commit()
-        return feeder
+        if(request.name.find("FEEDER_")):
+            feeder = db.query(Feeders).filter(Feeders.name == request.name).first()
+            if not feeder:
+                feeder = Feeders(name=request.name)
+                db.add(feeder)
+                db.commit()
+                settings = Settings(feeder_id=feeder.id)
+                db.add(settings)
+                db.commit()
+            print(user.name, feeder.name)
+            feeder_user = db.query(User_Feeder).filter_by(user_id=user.id, feeder_id=feeder.id).first()
+            if not feeder_user:
+                feeder_user = User_Feeder(user_id=user.id, feeder_id=feeder.id)
+                db.add(feeder_user)
+                db.commit()
+                return {'id': feeder.id, 'name': feeder.name}
     except Exception as e:
-        return {'message': e}
+        return {"message": str(e)}
     
 
 @router.delete("/delete_feeder/{id}")
 async def delete_feeder(id: int, db: Session = Depends(get_db)):
         try:
             db.query(User_Feeder).filter(User_Feeder.feeder_id == id).delete()
-            settings = db.query(Feeder_Settings).filter(Feeder_Settings.feeder_id == id).one()
-            db.query(Settings).filter(Settings.id == settings.setting_id).delete()
-            settings.delete()
+            db.query(Settings).filter(Settings.feeder_id == id).delete()
             db.query(Feeders).filter(Feeders.id == id).delete()
             db.commit()
             return {'message': 'ok'}
@@ -79,13 +80,13 @@ async def get_feeders_by_user(request: Token, db: Session = Depends(get_db)):
                 'collars': []
             }
             print(feed_elem.collars)
-            print(feed_elem.settings)
+            print(feed_elem.setting)
             if len(feed_elem.collars) > 0:
                 for collar in feed_elem.collars:
                     print(collar.collar_id)
                     collar = db.query(Collars).filter(Collars.id == collar.collar_id).one()
                     elem['collars'].append(collar)
-            setting = db.query(Settings).filter(Settings.id == feed_elem.settings[0].setting_id).one()
+            setting = db.query(Settings).filter(Settings.feeder_id == feed_elem.id).one()
 
             elem["schedule"] = setting.schedule
             elem['timezone'] = setting.timezone
