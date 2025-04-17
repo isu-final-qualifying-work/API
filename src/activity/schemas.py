@@ -34,8 +34,10 @@ class NewLitterClean(BaseModel):
 class Eating(BaseModel):
     feeder: str
     collar: str
+    size: int
 
 class NewEating(BaseModel):
     feeder_id: int
     collar_id: int
+    size: int
     datetime: datetime

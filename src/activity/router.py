@@ -87,7 +87,7 @@ async def eating_activity(request: Eating, db: Session = Depends(get_db)):
     try:
         feeder = db.query(Feeders).where(Feeders.name == request.feeder).one()
         collar = db.query(Collars).where(Collars.name == request.collar).one()
-        data = LitterCleans(feeder_id=feeder.id, collar_id = collar.id, datetime=datetime.now())
+        data = EatingActivity(feeder_id=feeder.id, collar_id = collar.id, size=request.size, datetime=datetime.now())
         db.add(data)
         db.commit()
         db.refresh(data)
