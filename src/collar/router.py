@@ -82,10 +82,10 @@ async def add_collar(request: NewCollar, db: Session = Depends(get_db)):
             litter_collar = Litter_Collar(litter_id = litter.id, collar_id = collar.id)
             db.add(litter_collar)
         db.commit()
-        if request.kitten == True:
-            pet = Pets(name=request.pet_name, collar_id=collar.id, gender=request.gender, is_kitten=request.kitten)
+        if request.child == True:
+            pet = Pets(name=request.pet_name, type=request.type, collar_id=collar.id, gender=request.gender, is_child=request.child, weight=request.weight, is_pregnant=False, is_sterilized=False)
         else:
-            pet = Pets(name=request.pet_name, collar_id=collar.id, gender=request.gender, is_kitten=request.kitten, weight=request.weight, is_pregnant=request.pregnant, is_sterilized=request.sterilized)
+            pet = Pets(name=request.pet_name, type=request.type, collar_id=collar.id, gender=request.gender, is_child=request.child, weight=request.weight, is_pregnant=request.pregnant, is_sterilized=request.sterilized)
         db.add(pet)
         db.commit()
         print(pet)
@@ -100,6 +100,7 @@ async def delete_collar(id: int, db: Session = Depends(get_db)):
     try:
         db.query(Litter_Collar).filter(Litter_Collar.collar_id == id).delete()
         db.query(Feeder_Collar).filter(Feeder_Collar.collar_id == id).delete()
+        db.query(Pets).filter(Pets.collar_id == id).delete()
         db.query(Collars).filter(Collars.id == id).delete()
         db.commit()
         return {'message': 'ok'}

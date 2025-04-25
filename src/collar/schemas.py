@@ -12,7 +12,8 @@ class NewCollar(Token):
     device_type: str
     pet_name: str
     gender: str
-    kitten: bool
+    type: str
+    child: bool
     pregnant: bool
     sterilized: bool
     weight: int

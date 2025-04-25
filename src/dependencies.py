@@ -9,10 +9,11 @@ from typing import Annotated
 from src.database import SessionLocal
 from src.auth.schemas import TokenData
 from src.user.models import Users
+from src.config.env import DICT_ENVS
 
-SECRET_KEY = "123"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+SECRET_KEY = DICT_ENVS['SECRET_KEY']
+ALGORITHM = DICT_ENVS['ALGORITHM']
+ACCESS_TOKEN_EXPIRE_MINUTES = DICT_ENVS['ACCESS_TOKEN_EXPIRE_MINUTES']
 
 def get_db():
     db = SessionLocal()

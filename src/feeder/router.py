@@ -33,25 +33,25 @@ async def get_feeder(request: FeederID, db: Session = Depends(get_db)):
 async def add_feeder(request: NewFeeder, db: Session = Depends(get_db)):
     try:
         user = get_current_user(db, request.access_token)
-        if(request.name.find("FEEDER_")):
-            feeder = db.query(Feeders).filter(Feeders.name == request.name).first()
-            if not feeder:
-                feeder = Feeders(name=request.name)
-                db.add(feeder)
-                db.commit()
-                settings = Settings(feeder_id=feeder.id)
-                db.add(settings)
-                db.commit()
-            print(user.name, feeder.name)
-            feeder_user = db.query(User_Feeder).filter_by(user_id=user.id, feeder_id=feeder.id).first()
-            if not feeder_user:
-                feeder_user = User_Feeder(user_id=user.id, feeder_id=feeder.id)
-                db.add(feeder_user)
-                db.commit()
-                return {'id': feeder.id, 'name': feeder.name}
+        feeder = db.query(Feeders).filter(Feeders.name == request.name).first()
+        if not feeder:
+            feeder = Feeders(name=request.name)
+            db.add(feeder)
+            db.commit()
+            settings = Settings(feeder_id=feeder.id)
+            db.add(settings)
+            db.commit()
+        print(feeder.name)
+        feeder_user = db.query(User_Feeder).filter_by(user_id=user.id, feeder_id=feeder.id).first()
+        if not feeder_user:
+            feeder_user = User_Feeder(user_id=user.id, feeder_id=feeder.id)
+            db.add(feeder_user)
+            db.commit()
+        
+        print(feeder_user)
+        return {'id': feeder.id, 'name': feeder.name}
     except Exception as e:
-        return {"message": str(e)}
-    
+        return {"message": str(e)}    
 
 @router.delete("/delete_feeder/{id}")
 async def delete_feeder(id: int, db: Session = Depends(get_db)):
